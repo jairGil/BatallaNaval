@@ -15,13 +15,13 @@ CND_PACKAGE_DIR_Debug=dist/Debug/MinGW-Windows/package
 CND_PACKAGE_NAME_Debug=batallanaval.tar
 CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-Windows/package/batallanaval.tar
 # Release configuration
-CND_PLATFORM_Release=MinGW-Windows
-CND_ARTIFACT_DIR_Release=dist/Release/MinGW-Windows
+CND_PLATFORM_Release=Cygwin-Windows
+CND_ARTIFACT_DIR_Release=dist/Release/Cygwin-Windows
 CND_ARTIFACT_NAME_Release=batallanaval
-CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/batallanaval
-CND_PACKAGE_DIR_Release=dist/Release/MinGW-Windows/package
+CND_ARTIFACT_PATH_Release=dist/Release/Cygwin-Windows/batallanaval
+CND_PACKAGE_DIR_Release=dist/Release/Cygwin-Windows/package
 CND_PACKAGE_NAME_Release=batallanaval.tar
-CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/batallanaval.tar
+CND_PACKAGE_PATH_Release=dist/Release/Cygwin-Windows/package/batallanaval.tar
 #
 # include compiler specific variables
 #
