@@ -5,6 +5,8 @@
  */
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*  Validacion de numeros con codigo ASCII  */
 int validaInt (char * numero) {
