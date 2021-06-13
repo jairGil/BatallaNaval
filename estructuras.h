@@ -22,7 +22,7 @@ extern "C" {
 /*Coordenadas (x,y)*/
 typedef struct cordenada {
     int x;
-    char y;
+    int y;
 } cordenada;
 
 /*Casilla de un tablero, contiene coordenada (x,y)*/
@@ -43,8 +43,10 @@ typedef struct nave {
 typedef struct tablero {
     int tamX;
     int tamY;
+    short ** mapa;
     nave * naves;
     casilla * tiradas;
+    int noTiros;
 } tablero;
 
 /*Almacena la configuracion con la que se iniciará el juego*/

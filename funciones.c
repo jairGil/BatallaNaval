@@ -28,72 +28,71 @@ void creaTablero(configuracion *config, tablero *tab)
     tab->tamY = config->tamY;
     tab->naves = (nave *)malloc(sizeof(nave) * config->noNaves);
     tab->tiradas = (casilla *)malloc(sizeof(casilla) * config->noTtiros);
+    tab->mapa = (short **)malloc(sizeof(short *) * config->tamX);
+    for(int i = 0; i < config->tamX; i++){
+        tab->mapa[i] = (short *)malloc(sizeof(short) * config->tamY);
+        for(int j = 0; j < config->tamY; j++){
+            tab->mapa[i][j] = 0;
+        }
+    }
+    tab->noTiros = 0;
 }
 
 /* Setear la orientacion de una nave */
-int setOrientacion () {
+int setOrientacion()
+{
     int valor;
     printf("\nOrientacion\n1.Horizontal (o un numero impar)\n2.Vertical (o un numero par)");
-    valor = pideInt("Orientacion de la nave: ");
+    valor = pideInt("\nOrientacion de la nave: ");
     if (valor % 2 == 0)
         return VERTICAL;
-    else 
+    else
         return HORIZONTAL;
 }
 
 /* Setear las casillas que ocupa la nave */
-casilla * setCasillas (int tam, int orientacion) {
-    casilla * casillas;
-    casillas = (casilla *) malloc(sizeof(casilla) * tam);
+casilla *setCasillas(int tam, int orientacion, tablero *tab)
+{
+    casilla *casillas;
+    casillas = (casilla *)malloc(sizeof(casilla) * tam);
 
-    for (int i = 0; i < tam; i++) {
-        int incorrecto = 0;
-        if (i > 0) 
-        {
-            switch (orientacion)
-            {
-            case HORIZONTAL:
-                do {
-                    casillas[i].cord.x = pideInt("\nX: ");
-                    casillas[i].cord.y = pideInt("Y: ");
+    casillas[0].cord.x = pideInt("\nX: ");
+    casillas[0].cord.y = pideInt("Y: ");
 
-                    if (casillas[i].cord.x != casillas[i-1].cord.x) 
-                    {
-                        printf("\nLa posicion no corresponde a la orientacion");
-                        incorrecto = 1;
-                    }
-
-                    if ( (casillas[i].cord.x == casillas[i-1].cord.x) && (casillas[i].cord.y == casillas[i-1].cord.y) ) 
-                    {
-                        printf("\nNo puede colocar sobre una casilla ya ocupada por la nave");
-                        incorrecto = 1;
-                    }
-                } while (incorrecto);
-                break;
-            case VERTICAL:
-
-                break;
+    tab->mapa[casillas[0].cord.x - 1][casillas[0].cord.y - 1] = 1;
+    
+    switch (orientacion) {
+        case HORIZONTAL:
+            for (int i = 1; i < tam; i++) {
+                casillas[i].cord.y = casillas[i-1].cord.y + 1;
+                casillas[i].cord.x = casillas[0].cord.x;
+                tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
             }
-        } else {
-            casillas[i].cord.x = pideInt("X: ");
-            casillas[i].cord.y = pideInt("Y: ");
-        }
+            break;
+        case VERTICAL:
+            for (int i = 1; i < tam; i++) {
+                casillas[i].cord.x = casillas[i-1].cord.x + 1;
+                casillas[i].cord.y = casillas[0].cord.y;
+                tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
+            }
+            break;
     }
+
+    return casillas;
 }
 
 /* Setear los valores de las naves */
-nave setNave(int n, int tam) {
+nave setNave(int n, int tam, tablero *tab)
+{
     nave nav;
-    for(int i = 0; i < n; i++) {
-        nav.longitud = tam;
-        nav.estado = 0;
-        if (tam > 1) {
-            nav.orientacion = setOrientacion();
-        } else {
-            nav.orientacion = HORIZONTAL;
-        }
-        nav.casillas = setCasillas(tam, nav.orientacion);
+    nav.longitud = tam;
+    nav.estado = 0;
+    if (tam > 1) {
+        nav.orientacion = setOrientacion();
+    } else {
+        nav.orientacion = HORIZONTAL;
     }
+    nav.casillas = setCasillas(tam, nav.orientacion, tab);
 }
 
 /*Crea y coloca las naves del juego en el tablero*/
@@ -106,38 +105,143 @@ void llenaTablero(configuracion *config, tablero *tab)
 
     printf("\n\t.:CREACION DE LAS NAVES:.");
     // Control de numero de naves
-    while (n < config->noNaves)
-    {
+    while (n < config->noNaves) {
         // Controlar que el tamaño de las naves no sea mayor que el maximo permitido
-        do
-        {
+        do {
             printf("\nCantidad de naves asignadas: %d\n", n);
             tamano = pideInt("Tamano de las naves: ");
             if (tamano > config->longMax)
                 printf("La longitud supera el maximo permitido (%d)\n", config->longMax);
-            else
-            {
+            else {
                 // Asignar la cantidad de naves de el tamaño ingresado anteriormente
                 do
                 {
                     cantidad = pideInt("Cantidad de naves a asignar: ");
-
                     n += cantidad;
-
                     if (n > config->noNaves)
                     {
                         printf("\nEste numero de naves rebasa el maximo permitido\n");
                         n -= cantidad;
-                    } else
-                    {
-                        for (i; i < n; i++)
-                        {
+                    } else {
+                        for (i; i < n; i++) {
                             printf("Nave no.%d\n", i);
-                            tab->naves[i] = setNave(cantidad, tamano);
+                            tab->naves[i] = setNave(cantidad, tamano, tab);
                         }
                     }
                 } while (n > config->noNaves);
             }
         } while (tamano > config->longMax);
+    }
+}
+
+/********************/
+/*Funciones de juego*/
+/********************/
+
+/*Verifica si 2 coordenadas son iguales*/
+int comparaCordenada(const cordenada c1, const cordenada c2) {
+    if (c1.x == c2.x && c1.y == c2.y) {
+        return 1;
+    }
+    return 0;
+}
+
+/* Verificar si una nave está en una cordenada*/
+int hayNave(const tablero tab, const configuracion config, const cordenada cord) {
+    for (int i = 0; i < config.noNaves; i++) {
+        for(int j = 0; j < tab.naves[i].longitud; j++) {
+            if(comparaCordenada(tab.naves[i].casillas->cord, cord)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+/*Verificar si una nave esta hundida*/
+int naveHundida(nave nav) {
+    if (nav.estado == nav.longitud) {
+        return 1;
+    }
+    return 0;
+}
+
+/* Verifica que el jugador aun tenga tiradas disponibles */
+int verificarTiros(const tablero tab, const configuracion config){
+    return (config.noTtiros - tab.noTiros);
+}
+
+/* Verifica que aun haya naves en el tablero */
+int navesFlotando(const tablero tab, const configuracion config) {
+    int contador = config.noNaves;
+    for (int i = 0; i < config.noNaves; i++) {
+        if (naveHundida(tab.naves[i])) {
+            contador--;
+        }
+    }
+    return contador;
+}
+
+/*Validar si un tiro da en una nave y la hunde*/
+int validaTiro(tablero *tab, const cordenada cord, const configuracion config) 
+{
+    int i, j;
+    for (i = 0; i < config.noNaves; i++)
+    {
+        for(j = 0; j < tab->naves[i].longitud; j++)
+        {
+            if(comparaCordenada(tab->naves[i].casillas->cord, cord))
+            {
+                if (tab->naves[i].casillas->atacada != 1){
+                    tab->naves[i].estado++;
+                    tab->naves[i].casillas->atacada = 1;
+                    tab->mapa[tab->naves[i].casillas->cord.x - 1][tab->naves[i].casillas->cord.x - 1] = 2;
+                    return 1; // Casilla nueva atacada
+                }
+                return 2; // Casilla atacada anteriormente
+            }
+        }
+    }
+    
+    return 0; // Casilla atacada sin nave (cae en agua)
+}
+
+/* Llena el arreglo de tiros del jugador */
+void llenaTiradas(tablero *tab, casilla cas) 
+{
+    cas.atacada = 1;
+    tab->tiradas[tab->noTiros] = cas;
+    tab->noTiros++;
+    tab->mapa[cas.cord.x - 1][cas.cord.y - 1] = 3;
+}
+
+/* Imprime el tablero en pantalla */
+void mostrarTablero(const tablero tab) {
+    for (int y = 0; y < tab.tamY; y++) {
+            printf("|----");
+        }
+        
+        printf("|\n");
+
+    for (int x = 0; x < tab.tamX; x++) {
+        for (int y = 0; y < tab.tamY; y++) {
+            if (tab.mapa[x][y] == 1) {
+                printf("| ██ ");
+            } else if(tab.mapa[x][y] == 2) {
+                printf("| ¤¤ ");
+            } else if(tab.mapa[x][y] == 3) {
+                printf("| xx ");
+            } else {
+                printf("|    ");
+            }
+        }
+
+        printf("|\n");
+
+        for (int y = 0; y < tab.tamY; y++) {
+            printf("|----");
+        }
+        
+        printf("|\n");
     }
 }
