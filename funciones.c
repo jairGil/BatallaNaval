@@ -11,8 +11,7 @@
 #define VERTICAL 0
 
 /*Pide a un usuario las configuraciones iniciales del juego*/
-void pideConfiguracion(configuracion *config)
-{
+void pideConfiguracion(configuracion *config) {
     printf("\n\t.:CONFIGURACION DEL JUEGO:.\n");
     config->tamX = pideInt("Tamano en X: ");
     config->tamY = pideInt("Tamano en Y: ");
@@ -22,8 +21,7 @@ void pideConfiguracion(configuracion *config)
 }
 
 /*Crea el tablero en base a la configuracion del juego*/
-void creaTablero(configuracion *config, tablero *tab)
-{
+void creaTablero(configuracion *config, tablero *tab) {
     tab->tamX = config->tamX;
     tab->tamY = config->tamY;
     tab->naves = (nave *)malloc(sizeof(nave) * config->noNaves);
@@ -39,8 +37,7 @@ void creaTablero(configuracion *config, tablero *tab)
 }
 
 /* Setear la orientacion de una nave */
-int setOrientacion()
-{
+int setOrientacion() {
     int valor;
     printf("\nOrientacion\n1.Horizontal (o un numero impar)\n2.Vertical (o un numero par)");
     valor = pideInt("\nOrientacion de la nave: ");
@@ -51,8 +48,7 @@ int setOrientacion()
 }
 
 /* Setear las casillas que ocupa la nave */
-casilla *setCasillas(int tam, int orientacion, tablero *tab)
-{
+casilla *setCasillas(int tam, int orientacion, tablero *tab) {
     casilla *casillas;
     casillas = (casilla *)malloc(sizeof(casilla) * tam);
 
@@ -82,8 +78,7 @@ casilla *setCasillas(int tam, int orientacion, tablero *tab)
 }
 
 /* Setear los valores de las naves */
-nave setNave(int n, int tam, tablero *tab)
-{
+nave setNave(int n, int tam, tablero *tab) {
     nave nav;
     nav.longitud = tam;
     nav.estado = 0;
@@ -96,8 +91,7 @@ nave setNave(int n, int tam, tablero *tab)
 }
 
 /*Crea y coloca las naves del juego en el tablero*/
-void llenaTablero(configuracion *config, tablero *tab)
-{
+void llenaTablero(configuracion *config, tablero *tab) {
     int i = 0;
     int n = 0;
     int tamano;
@@ -114,12 +108,10 @@ void llenaTablero(configuracion *config, tablero *tab)
                 printf("La longitud supera el maximo permitido (%d)\n", config->longMax);
             else {
                 // Asignar la cantidad de naves de el tamaño ingresado anteriormente
-                do
-                {
+                do {
                     cantidad = pideInt("Cantidad de naves a asignar: ");
                     n += cantidad;
-                    if (n > config->noNaves)
-                    {
+                    if (n > config->noNaves) {
                         printf("\nEste numero de naves rebasa el maximo permitido\n");
                         n -= cantidad;
                     } else {
@@ -183,16 +175,12 @@ int navesFlotando(const tablero tab, const configuracion config) {
 }
 
 /*Validar si un tiro da en una nave y la hunde*/
-int validaTiro(tablero *tab, const cordenada cord, const configuracion config) 
-{
+int validaTiro(tablero *tab, const cordenada cord, const configuracion config)  {
     int i, j;
-    for (i = 0; i < config.noNaves; i++)
-    {
-        for(j = 0; j < tab->naves[i].longitud; j++)
-        {
-            if(comparaCordenada(tab->naves[i].casillas->cord, cord))
-            {
-                if (tab->naves[i].casillas->atacada != 1){
+    for (i = 0; i < config.noNaves; i++) {
+        for(j = 0; j < tab->naves[i].longitud; j++) {
+            if(comparaCordenada(tab->naves[i].casillas->cord, cord)) {
+                if (tab->naves[i].casillas->atacada != 1) {
                     tab->naves[i].estado++;
                     tab->naves[i].casillas->atacada = 1;
                     tab->mapa[tab->naves[i].casillas->cord.x - 1][tab->naves[i].casillas->cord.x - 1] = 2;
@@ -207,8 +195,7 @@ int validaTiro(tablero *tab, const cordenada cord, const configuracion config)
 }
 
 /* Llena el arreglo de tiros del jugador */
-void llenaTiradas(tablero *tab, casilla cas) 
-{
+void llenaTiradas(tablero *tab, casilla cas) {
     cas.atacada = 1;
     tab->tiradas[tab->noTiros] = cas;
     tab->noTiros++;

@@ -17,7 +17,7 @@ int validaInt (char * numero) {
             el valor 57 corresponde al caracter 9
         */
         if (numero[i] < 48 || numero[i] > 57) {
-            printf("Ingrese un numero valido");
+            printf("\nIngrese un numero valido");
             return 0;
         }
     }
@@ -45,7 +45,7 @@ int pideInt(char * txt) {
         if (esValido) {
             num = atoi(valido);
             if (num == 0) {
-                printf("Ingrese un numero mayor a 0\n");
+                printf("\nIngrese un numero mayor a 0");
                 esValido = 0;
             }
         } 
