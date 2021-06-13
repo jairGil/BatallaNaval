@@ -54,8 +54,8 @@ casilla * setCasillas (int tam, int orientacion) {
             {
             case HORIZONTAL:
                 do {
-                    casillas[i].cord.x = pideInt("X: ");
-                    casillas[i].cord.y = pideInt("Y: ");
+                    casillas[i].cord.x = pideInt("\nX: ");
+                    casillas[i].cord.y = pideInt("\nY: ");
 
                     if (casillas[i].cord.x != casillas[i-1].cord.x) 
                     {
