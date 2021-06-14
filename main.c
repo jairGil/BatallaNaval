@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
             system("clear");
             printf("\n\tTablero del jugador %d\n", j + 1);
             mostrarTablero(tab[j]);
+            
             if (j == 0) {
                 turnoJugador(&tab[0], &tab[1], config);
             } else {

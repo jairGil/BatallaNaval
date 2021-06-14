@@ -150,7 +150,6 @@ int turnoJugador(tablero *jugador, tablero *rival, const configuracion config) {
     c.cord.x = pideInt("Posicion en x: ");
     c.cord.y = pideInt("Posicion en y: ");
     cas = &c;
-    printf("\nSe llena casilla");
     llenaTiradas(jugador, rival, cas);
     ataque = validaTiro(rival, c.cord, config);
 
@@ -240,10 +239,7 @@ void llenaTiradas(tablero *jugador, tablero *rival,casilla *cas) {
     cas->atacada = 1;
     jugador->tiradas[jugador->noTiros] = *cas;
     jugador->noTiros++;
-    printf("\n %d", rival->mapa[cas->cord.x - 1][cas->cord.y - 1]);
-    printf(" %d, %d", cas->cord.x - 1, cas->cord.y - 1);
     rival->mapa[cas->cord.x - 1][cas->cord.y - 1] = 3;
-    printf("\n %d", rival->mapa[cas->cord.x - 1][cas->cord.y - 1]);
 }
 
 /* Imprime el tablero en pantalla */
