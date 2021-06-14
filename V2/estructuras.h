@@ -50,34 +50,35 @@ typedef struct tablero {
 } tablero;
 
 /*Almacena la configuracion con la que se iniciará el juego*/
-typedef struct {
+typedef struct configuracion{
     int tamX;
     int tamY;
     int noNaves;
     int noTtiros;
     int longMax;
+    int * navPorLong;
 } configuracion;
 
-
-void pideConfiguracion(configuracion *config);
-void creaTablero(configuracion *config, tablero *tab);
+void setConfiguracion(const configuracion c);
+void pideConfiguracion();
+void creaTablero(tablero *tab);
 int setOrientacion();
 casilla *setCasillas(int tam, int orientacion, tablero *tab);
-nave setNave(int n, int tam, tablero *tab);
-void llenaTablero(configuracion *config, tablero *tab);
+nave setNave(int tam, tablero *tab);
+void llenaTablero(tablero *tab);
 
 /* FUNCIONES DEL JUEGO */
 
 int comparaCordenada(const cordenada c1, const cordenada c2);
-int turnoJugador(tablero *jugador, tablero *rival, const configuracion config);
-nave buscarNave(tablero *tab, const casilla c, const configuracion config);
+char* turnoJugador(tablero *jugador, tablero *rival);
+nave buscarNave(tablero *tab, const casilla c);
 int naveHundida(nave nav);
-int verificarTiros(const tablero tab, const configuracion config);
-int navesFlotando(const tablero tab, const configuracion config);
-int estadoJuego(const tablero tab, const configuracion config);
-int validaTiro(tablero *tab, const cordenada cord, const configuracion config);
+int verificarTiros(const tablero tab);
+int navesFlotando(const tablero tab);
+int estadoJuego(const tablero tab);
+int validaTiro(tablero *tab, const cordenada cord);
 void llenaTiradas(tablero *jugador, tablero *rival, casilla *cas);
-void mostrarTablero(const tablero tab);
+void mostrarTablero(tablero *tab);
 
 #ifdef __cplusplus
 }

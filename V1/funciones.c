@@ -12,12 +12,19 @@
 
 /*Pide a un usuario las configuraciones iniciales del juego*/
 void pideConfiguracion(configuracion *config) {
-    printf("\n\t.:CONFIGURACION DEL JUEGO:.\n");
+    int naves = 0;
     config->tamX = pideInt("Tamano en X: ");
     config->tamY = pideInt("Tamano en Y: ");
-    config->noNaves = pideInt("Numero de Naves: ");
-    config->longMax = pideInt("Longitud maxima de las naves: ");
     config->noTtiros = pideInt("Maximo de tiros: ");
+    config->longMax = pideInt("Longitud maxima de las naves: ");
+    config->navPorLong = (int*)(malloc(sizeof(int) * config->longMax));
+
+    for(int i = 0; i < config->longMax; i++){
+        printf("\nNumero de naves de longitud %d: ",i + 1);
+        config->navPorLong[i] = pideIntNave("");
+        naves += config->navPorLong[i];
+    }
+    config->noNaves = naves;
 }
 
 /*Crea el tablero en base a la configuracion del juego*/
@@ -48,38 +55,64 @@ int setOrientacion() {
         return HORIZONTAL;
 }
 
+/* Validar la posicion de una nave en horizontal */
+int validarHorizontal(const int tam, casilla *casillas, tablero *tab) {
+    cordenada c;
+
+    if(casillas[0].cord.y + tam - 1 > tab->tamY){
+        return 0;
+    }
+
+    
+
+    for (int i = 1; i < tam; i++) {
+        c.x = casillas[0].cord.x;
+        c.y = casillas[i-1].cord.y + 1;
+        
+        casillas[i].cord.y = casillas[i-1].cord.y + 1;
+        casillas[i].cord.x = casillas[0].cord.x;
+        tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
+    }
+    return 1;
+}
+
 /* Setear las casillas que ocupa la nave */
 casilla *setCasillas(int tam, int orientacion, tablero *tab) {
+    int correcto;
     casilla *casillas;
     casillas = (casilla *)malloc(sizeof(casilla) * tam);
 
-    casillas[0].cord.x = pideInt("\nX: ");
-    casillas[0].cord.y = pideInt("Y: ");
+    do{
+        casillas[0].cord.x = pideInt("\nX: ");
+        casillas[0].cord.y = pideInt("Y: ");
 
-    tab->mapa[casillas[0].cord.x - 1][casillas[0].cord.y - 1] = 1;
-    
-    switch (orientacion) {
-        case HORIZONTAL:
-            for (int i = 1; i < tam; i++) {
-                casillas[i].cord.y = casillas[i-1].cord.y + 1;
-                casillas[i].cord.x = casillas[0].cord.x;
-                tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
-            }
-            break;
-        case VERTICAL:
-            for (int i = 1; i < tam; i++) {
-                casillas[i].cord.x = casillas[i-1].cord.x + 1;
-                casillas[i].cord.y = casillas[0].cord.y;
-                tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
-            }
-            break;
-    }
+        tab->mapa[casillas[0].cord.x - 1][casillas[0].cord.y - 1] = 1;
+        
+        switch (orientacion) {
+            case HORIZONTAL:
+                correcto = verificarHorizontal();
+                for (int i = 1; i < tam; i++) {
+                    casillas[i].cord.y = casillas[i-1].cord.y + 1;
+                    casillas[i].cord.x = casillas[0].cord.x;
+                    tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
+                }
+                break;
+            case VERTICAL:
+                for (int i = 1; i < tam; i++) {
+                    casillas[i].cord.x = casillas[i-1].cord.x + 1;
+                    casillas[i].cord.y = casillas[0].cord.y;
+                    tab->mapa[casillas[i].cord.x - 1][casillas[i].cord.y - 1] = 1;
+                }
+                break;
+        }
+    }while(1);
+
 
     return casillas;
 }
 
 /* Setear los valores de las naves */
-nave setNave(int n, int tam, tablero *tab) {
+nave setNave(int tam, tablero *tab) {
     nave nav;
     nav.longitud = tam;
     nav.estado = 0;
@@ -89,41 +122,22 @@ nave setNave(int n, int tam, tablero *tab) {
         nav.orientacion = HORIZONTAL;
     }
     nav.casillas = setCasillas(tam, nav.orientacion, tab);
+    return nav;
 }
 
 /*Crea y coloca las naves del juego en el tablero*/
-void llenaTablero(configuracion *config, tablero *tab) {
-    int i = 0;
+void llenaTablero(const configuracion config, tablero *tab) {
     int n = 0;
-    int tamano;
-    int cantidad;
 
-    printf("\n\t.:CREACION DE LAS NAVES:.");
-    // Control de numero de naves
-    while (n < config->noNaves) {
-        // Controlar que el tamaño de las naves no sea mayor que el maximo permitido
-        do {
-            printf("\nCantidad de naves asignadas: %d\n", n);
-            tamano = pideInt("Tamano de las naves: ");
-            if (tamano > config->longMax)
-                printf("La longitud supera el maximo permitido (%d)\n", config->longMax);
-            else {
-                // Asignar la cantidad de naves de el tamaño ingresado anteriormente
-                do {
-                    cantidad = pideInt("Cantidad de naves a asignar: ");
-                    n += cantidad;
-                    if (n > config->noNaves) {
-                        printf("\nEste numero de naves rebasa el maximo permitido\n");
-                        n -= cantidad;
-                    } else {
-                        for (i; i < n; i++) {
-                            printf("Nave no.%d\n", i);
-                            tab->naves[i] = setNave(cantidad, tamano, tab);
-                        }
-                    }
-                } while (n > config->noNaves);
-            }
-        } while (tamano > config->longMax);
+    for (int i = 0; i < config.longMax; i++) {
+        for (int j = 0; j < config.navPorLong[i]; j++) {
+            system("clear");
+            printf("\n\t.:%d NAVES ASIGNADAS DE %d:.\n", n, config.noNaves);
+            mostrarTablero(tab);
+            printf("\nNave %d de longitud %d\n", j + 1, i + 1);
+            tab->naves[n] = setNave(i+1, tab);
+            n++;
+        }
     }
 }
 
@@ -140,34 +154,29 @@ int comparaCordenada(const cordenada c1, const cordenada c2) {
 }
 
 /* Pide un tiro a un jugador */
-int turnoJugador(tablero *jugador, tablero *rival, const configuracion config) {
+char* turnoJugador(tablero *jugador, tablero *rival, const configuracion config) {
     casilla c;
     casilla *cas;
-    int ataque;
     nave navAtacada;
 
-    printf("\n.:ATAQUE:.\n");
     c.cord.x = pideInt("Posicion en x: ");
     c.cord.y = pideInt("Posicion en y: ");
     cas = &c;
     llenaTiradas(jugador, rival, cas);
-    ataque = validaTiro(rival, c.cord, config);
-
-    switch (ataque) {
+    
+    switch (validaTiro(rival, c.cord, config)) {
         case 0:
-            printf("\nEl ataque dio al mar");
-            break;
+            return("\nEl ataque dio al mar");
         case 1:
             navAtacada = buscarNave(rival, c, config);
-            printf("\nEl ataque dio a una nave!");
-
+            
             if (naveHundida(navAtacada)) {
-                printf("\nHundiste una nave!");
+                return("\nEl ataque dio a una nave!\nHundiste una nave!");
+            } else {
+                return("\nEl ataque dio a una nave!");
             }
-            break;
         case 2:
-            printf("\nEsta posicion ya habia sido atacada");
-            break;
+            return("\nEsta posicion ya habia sido atacada");
     }
     
 }
@@ -182,7 +191,7 @@ nave buscarNave(tablero *tab, const casilla c, const configuracion config) {
     }
 }
 
-/*Verificar si una nave esta hundida*/
+/*Verificar si una nave esta hundida*/ 
 int naveHundida(nave nav) {
     if (nav.estado == nav.longitud) {
         return 1;
@@ -208,7 +217,7 @@ int navesFlotando(const tablero tab, const configuracion config) {
 
 /* Verificar el estado del juego*/
 int estadoJuego(const tablero tab, const configuracion config) {
-    if (navesFlotando(tab, config) || verificarTiros(tab, config)) {
+    if (navesFlotando(tab, config) && verificarTiros(tab, config)) {
         return 1;
     }
     return 0;
@@ -216,22 +225,24 @@ int estadoJuego(const tablero tab, const configuracion config) {
 
 /*Validar si un tiro da en una nave*/
 int validaTiro(tablero *tab, const cordenada cord, const configuracion config)  {
-    int i, j;
-    for (i = 0; i < config.noNaves; i++) {
-        for(j = 0; j < tab->naves[i].longitud; j++) {
-            if(comparaCordenada(tab->naves[i].casillas->cord, cord)) {
-                if (tab->naves[i].casillas->atacada != 1) {
+    int valor = 0;
+
+    for (int i = 0; i < config.noNaves; i++) {
+        for(int j = 0; j < tab->naves[i].longitud; j++) {
+            if(comparaCordenada(tab->naves[i].casillas[j].cord, cord)) {
+                if (tab->naves[i].casillas[j].atacada != 1) {
                     tab->naves[i].estado++;
-                    tab->naves[i].casillas->atacada = 1;
-                    tab->mapa[tab->naves[i].casillas->cord.x - 1][tab->naves[i].casillas->cord.x - 1] = 2;
-                    return 1; // Casilla nueva atacada
+                    tab->naves[i].casillas[j].atacada = 1;
+                    tab->mapa[tab->naves[i].casillas[j].cord.x - 1][tab->naves[i].casillas[j].cord.y - 1] = 2;
+                    valor = 1; // Casilla nueva atacada
+                    break;
                 }
-                return 2; // Casilla atacada anteriormente
+                valor = 2; // Casilla atacada anteriormente
+                break;
             }
         }
     }
-    
-    return 0; // Casilla atacada sin nave (cae en agua)
+    return valor; // Casilla atacada sin nave (cae en agua)
 }
 
 /* Llena el arreglo de tiros del jugador */
@@ -243,20 +254,20 @@ void llenaTiradas(tablero *jugador, tablero *rival,casilla *cas) {
 }
 
 /* Imprime el tablero en pantalla */
-void mostrarTablero(const tablero tab) {
-    for (int y = 0; y < tab.tamY; y++) {
+void mostrarTablero(tablero *tab) {
+    for (int y = 0; y < tab->tamY; y++) {
             printf("|----");
         }
         
         printf("|\n");
 
-    for (int x = 0; x < tab.tamX; x++) {
-        for (int y = 0; y < tab.tamY; y++) {
-            if (tab.mapa[x][y] == 1) {
+    for (int x = 0; x < tab->tamX; x++) {
+        for (int y = 0; y < tab->tamY; y++) {
+            if (tab->mapa[x][y] == 1) {
                 printf("| ██ ");
-            } else if(tab.mapa[x][y] == 2) {
+            } else if(tab->mapa[x][y] == 2) {
                 printf("| ¤¤ ");
-            } else if(tab.mapa[x][y] == 3) {
+            } else if(tab->mapa[x][y] == 3) {
                 printf("| xx ");
             } else {
                 printf("|    ");
@@ -265,7 +276,7 @@ void mostrarTablero(const tablero tab) {
 
         printf("|\n");
 
-        for (int y = 0; y < tab.tamY; y++) {
+        for (int y = 0; y < tab->tamY; y++) {
             printf("|----");
         }
         
