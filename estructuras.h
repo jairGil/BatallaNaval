@@ -43,7 +43,7 @@ typedef struct nave {
 typedef struct tablero {
     int tamX;
     int tamY;
-    short ** mapa;
+    int ** mapa;
     nave * naves;
     casilla * tiradas;
     int noTiros;
@@ -58,6 +58,26 @@ typedef struct {
     int longMax;
 } configuracion;
 
+
+void pideConfiguracion(configuracion *config);
+void creaTablero(configuracion *config, tablero *tab);
+int setOrientacion();
+casilla *setCasillas(int tam, int orientacion, tablero *tab);
+nave setNave(int n, int tam, tablero *tab);
+void llenaTablero(configuracion *config, tablero *tab);
+
+/* FUNCIONES DEL JUEGO */
+
+int comparaCordenada(const cordenada c1, const cordenada c2);
+int turnoJugador(tablero *jugador, tablero *rival, const configuracion config);
+nave buscarNave(tablero *tab, const casilla c, const configuracion config);
+int naveHundida(nave nav);
+int verificarTiros(const tablero tab, const configuracion config);
+int navesFlotando(const tablero tab, const configuracion config);
+int estadoJuego(const tablero tab, const configuracion config);
+int validaTiro(tablero *tab, const cordenada cord, const configuracion config);
+void llenaTiradas(tablero *jugador, tablero *rival, casilla *cas);
+void mostrarTablero(const tablero tab);
 
 #ifdef __cplusplus
 }

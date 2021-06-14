@@ -26,9 +26,10 @@ void creaTablero(configuracion *config, tablero *tab) {
     tab->tamY = config->tamY;
     tab->naves = (nave *)malloc(sizeof(nave) * config->noNaves);
     tab->tiradas = (casilla *)malloc(sizeof(casilla) * config->noTtiros);
-    tab->mapa = (short **)malloc(sizeof(short *) * config->tamX);
+    tab->mapa = (int **)malloc(sizeof(int *) * config->tamX);
+    
     for(int i = 0; i < config->tamX; i++){
-        tab->mapa[i] = (short *)malloc(sizeof(short) * config->tamY);
+        tab->mapa[i] = (int *)malloc(sizeof(int) * config->tamY);
         for(int j = 0; j < config->tamY; j++){
             tab->mapa[i][j] = 0;
         }
@@ -138,16 +139,48 @@ int comparaCordenada(const cordenada c1, const cordenada c2) {
     return 0;
 }
 
-/* Verificar si una nave está en una cordenada*/
-int hayNave(const tablero tab, const configuracion config, const cordenada cord) {
-    for (int i = 0; i < config.noNaves; i++) {
-        for(int j = 0; j < tab.naves[i].longitud; j++) {
-            if(comparaCordenada(tab.naves[i].casillas->cord, cord)) {
-                return 1;
+/* Pide un tiro a un jugador */
+int turnoJugador(tablero *jugador, tablero *rival, const configuracion config) {
+    casilla c;
+    casilla *cas;
+    int ataque;
+    nave navAtacada;
+
+    printf("\n.:ATAQUE:.\n");
+    c.cord.x = pideInt("Posicion en x: ");
+    c.cord.y = pideInt("Posicion en y: ");
+    cas = &c;
+    printf("\nSe llena casilla");
+    llenaTiradas(jugador, rival, cas);
+    ataque = validaTiro(rival, c.cord, config);
+
+    switch (ataque) {
+        case 0:
+            printf("\nEl ataque dio al mar");
+            break;
+        case 1:
+            navAtacada = buscarNave(rival, c, config);
+            printf("\nEl ataque dio a una nave!");
+
+            if (naveHundida(navAtacada)) {
+                printf("\nHundiste una nave!");
+            }
+            break;
+        case 2:
+            printf("\nEsta posicion ya habia sido atacada");
+            break;
+    }
+    
+}
+
+nave buscarNave(tablero *tab, const casilla c, const configuracion config) {
+    for (int i = 0; i < config.noNaves ; i++) {        
+        for(int j = 0; j < tab->naves[i].longitud; j++) {
+            if(comparaCordenada(tab->naves[i].casillas[j].cord, c.cord)) {  
+                return tab->naves[i];
             }
         }
     }
-    return 0;
 }
 
 /*Verificar si una nave esta hundida*/
@@ -174,7 +207,15 @@ int navesFlotando(const tablero tab, const configuracion config) {
     return contador;
 }
 
-/*Validar si un tiro da en una nave y la hunde*/
+/* Verificar el estado del juego*/
+int estadoJuego(const tablero tab, const configuracion config) {
+    if (navesFlotando(tab, config) || verificarTiros(tab, config)) {
+        return 1;
+    }
+    return 0;
+}
+
+/*Validar si un tiro da en una nave*/
 int validaTiro(tablero *tab, const cordenada cord, const configuracion config)  {
     int i, j;
     for (i = 0; i < config.noNaves; i++) {
@@ -195,11 +236,14 @@ int validaTiro(tablero *tab, const cordenada cord, const configuracion config)  
 }
 
 /* Llena el arreglo de tiros del jugador */
-void llenaTiradas(tablero *tab, casilla cas) {
-    cas.atacada = 1;
-    tab->tiradas[tab->noTiros] = cas;
-    tab->noTiros++;
-    tab->mapa[cas.cord.x - 1][cas.cord.y - 1] = 3;
+void llenaTiradas(tablero *jugador, tablero *rival,casilla *cas) {
+    cas->atacada = 1;
+    jugador->tiradas[jugador->noTiros] = *cas;
+    jugador->noTiros++;
+    printf("\n %d", rival->mapa[cas->cord.x - 1][cas->cord.y - 1]);
+    printf(" %d, %d", cas->cord.x - 1, cas->cord.y - 1);
+    rival->mapa[cas->cord.x - 1][cas->cord.y - 1] = 3;
+    printf("\n %d", rival->mapa[cas->cord.x - 1][cas->cord.y - 1]);
 }
 
 /* Imprime el tablero en pantalla */
