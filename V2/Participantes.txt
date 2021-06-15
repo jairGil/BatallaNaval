@@ -1,0 +1,9 @@
+Proyecto elaborado para la asignatura:
+	Lenguaje de programación Estructurado
+
+Impartido por:
+	M. en Ing. Sara Vera Noguez
+
+Los alumnos que participaron en la elaboración del proyecto fuimos:
+	-Daniel Sotelo Rizo
+	-Josue Jair Gil Dolores
